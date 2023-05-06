@@ -6,6 +6,83 @@ if (!isConnect('admin')) {
 $plugin = plugin::byId('tydom');
 sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
+
+$alarms = array();
+$hvacs = array();
+$lights = array();
+$shutters = array();
+$others = array();
+$windows = array();
+$awnings = array();
+$notmanageds = array();
+$toggles = array();
+$doors = array();
+
+foreach ($eqLogics as $eqLogic) {
+    switch ($eqLogic->getTags())
+    {
+        case 'alarm':
+        case 'motion':
+            array_push($alarms, $eqLogic);
+            break;
+		case 'hvac':
+        case 'hvac-boiler':
+        case 'hvac-electric':
+        case 'hvac-central':
+		case 'conso':
+            array_push($hvacs, $eqLogic);
+            break;
+        case 'light':
+            array_push($lights, $eqLogic);
+            break;
+        case 'toggle':
+		case 'interrupter':
+            array_push($toggles, $eqLogic);
+            break;
+        case 'belmDoor':
+        case 'door':
+		case 'garage_door':
+		case 'gate':
+            array_push($doors, $eqLogic);
+            break;    
+        case 'not-managed':
+            array_push($notmanageds, $eqLogic);
+            break;
+        case 'awning':
+            array_push($awnings, $eqLogic);
+            break;
+        case 'shutter':
+            array_push($shutters, $eqLogic);
+            break;
+        case 'klineWindowSliding':
+        case 'klineWindowOthers':
+        case 'klineWindowFrench':
+        case 'WindowFrench':
+        case 'window':
+            array_push($windows, $eqLogic);
+            break;
+        default:
+            array_push($others, $eqLogic);
+    }
+} 
+function displayCategory($eqLogics, $title)
+{
+    echo '<div class="eqLogicThumbnailContainer">';
+    echo '<legend><i class="fa fa-table"></i> {{'.$title.'}}</legend>';
+    foreach ($eqLogics as $eqLogic) {
+        $opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
+        echo '<div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
+        echo '<img src="' . $eqLogic->getImage() . '"/>';
+        echo '<br>';
+        echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
+        echo '</div>';
+    }
+    echo '</div>';
+}
+uasort($eqLogics, function($a, $b)
+{
+    return $a->getTags().$a->getName() > $b->getTags().$b->getName();
+});
 ?>
 
 <div class="row row-overflow">
@@ -26,6 +103,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
       </div>
     </div>
     <legend><i class="fas fa-table"></i> {{Mes équipements}}</legend>
+	
     <div class="input-group" style="margin:5px;">
       <input class="form-control roundedLeft" placeholder="{{Rechercher}}" id="in_searchEqlogic">
       <div class="input-group-btn">
@@ -34,17 +112,40 @@ $eqLogics = eqLogic::byType($plugin->getId());
       </div>
     </div>
     <div class="eqLogicThumbnailContainer">
-      <?php
-      foreach ($eqLogics as $eqLogic) {
-        $opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
-        echo '<div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
-        echo '<img src="' . $eqLogic->getImage() . '"/>';
-        echo '<br>';
-        echo '<span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
-        echo '</div>';
-      }
-      ?>
+
     </div>
+	      <?php
+        if(count($alarms)>0){
+            displayCategory($alarms, 'Alarm');
+        }
+        if(count($hvacs)>0){
+            displayCategory($hvacs, 'Hvac & Sensor');
+        }
+        if(count($lights)>0){
+            displayCategory($lights, 'Light');
+        }
+        if(count($shutters)>0){
+            displayCategory($shutters, 'Shutter');
+        }
+        if(count($doors)>0){
+            displayCategory($doors, 'Door');
+        }
+        if(count($windows)>0){
+            displayCategory($windows, 'Window');
+        }
+        if(count($awnings)>0){
+            displayCategory($awnings, 'Awning');
+        }
+        if(count($toggles)>0){
+            displayCategory($toggles, 'Toggle');
+        }
+        if(count($others)>0){
+            displayCategory($others, 'Other');
+        }
+        if(count($notmanageds)>0){
+            displayCategory($notmanageds, 'Not managed');
+        }
+        ?>
   </div>
 
   <!-- Page de présentation de l'équipement -->
