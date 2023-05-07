@@ -60,9 +60,11 @@ if (isset($result['msg_type'])) {
         $eqLogic->setName($endpoint['name']);
         $eqLogic->setIsEnable(1);
         $eqLogic->setEqType_name('tydom');
+		
       }
       $eqLogic->setConfiguration('first_usage', $endpoint['first_usage']);
       $eqLogic->setConfiguration('last_usage', $endpoint['last_usage']);
+	  $eqLogic->setTags($endpoint['first_usage']);
       $eqLogic->save();
 
       if ($endpoint['last_usage'] == 'conso') {
@@ -78,7 +80,7 @@ if (isset($result['msg_type'])) {
         $cmd->setSubType('other');
         $cmd->save();
       }
-
+	  
       file_put_contents(__DIR__ . '/../../data/devices/' . $eqLogicId . '.json', json_encode($endpoint));
     }
   } else if ($result['msg_type'] == 'msg_metadata') {
